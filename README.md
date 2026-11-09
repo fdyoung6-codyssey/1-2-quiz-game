@@ -89,3 +89,9 @@ python main.py
     "best_score": 100
 }
 ```
+
+
+## 7. Git 실습 기록
+
+- `git clone`으로 저장소를 별도 폴더(1-2-quiz-game-clone)에 복제하여 README를 수정하고 push함
+- 원래 작업 폴더에서 `git pull`로 변경사항을 가져와 반영을 확인함
