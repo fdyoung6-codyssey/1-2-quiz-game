@@ -115,6 +115,13 @@
             "correct": 3,
             "score": 100,
             "hints": 0
+        },
+        {
+            "date": "2026-11-09 18:17",
+            "total": 3,
+            "correct": 3,
+            "score": 83,
+            "hints": 1
         }
     ]
 }
