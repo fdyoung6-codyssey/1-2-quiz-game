@@ -56,9 +56,73 @@ def create_default_quizzes():
     ]
 
 
-# ----- 테스트용 코드 (기본 퀴즈가 잘 만들어졌는지 확인) -----
+class QuizGame:
+    """퀴즈 게임 전체(퀴즈 목록, 최고 점수, 메뉴)를 관리하는 클래스"""
+
+    def __init__(self):
+        self.quizzes = create_default_quizzes()  # 퀴즈 목록 (리스트)
+        self.best_score = None                   # 최고 점수 (아직 안 풀었으면 None)
+
+    def get_number(self, prompt, min_num, max_num):
+        """숫자를 입력받는다. 올바른 숫자가 들어올 때까지 다시 물어본다."""
+        while True:
+            text = input(prompt).strip()  # strip() : 앞뒤 공백 제거
+
+            # 1) 빈 입력 (그냥 Enter)
+            if text == "":
+                print("⚠️ 입력이 비어 있습니다. 숫자를 입력하세요.")
+                continue
+
+            # 2) 숫자가 아닌 입력 (예: abc)
+            try:
+                number = int(text)
+            except ValueError:
+                print(f"⚠️ 잘못된 입력입니다. {min_num}-{max_num} 사이의 숫자를 입력하세요.")
+                continue
+
+            # 3) 범위를 벗어난 숫자 (예: 9)
+            if number < min_num or number > max_num:
+                print(f"⚠️ 잘못된 입력입니다. {min_num}-{max_num} 사이의 숫자를 입력하세요.")
+                continue
+
+            return number  # 올바른 숫자면 돌려주고 반복 종료
+
+    def show_menu(self):
+        """메인 메뉴를 출력한다"""
+        print()
+        print("=" * 40)
+        print("       🎯 나만의 퀴즈 게임 🎯")
+        print("=" * 40)
+        print("1. 퀴즈 풀기")
+        print("2. 퀴즈 추가")
+        print("3. 퀴즈 목록")
+        print("4. 점수 확인")
+        print("5. 종료")
+        print("=" * 40)
+
+    def run(self):
+        """프로그램의 중심: 메뉴를 보여주고 선택한 기능을 실행한다"""
+        while True:
+            self.show_menu()
+            choice = self.get_number("선택: ", 1, 5)
+
+            if choice == 1:
+                print("🚧 퀴즈 풀기 기능은 준비 중입니다.")
+            elif choice == 2:
+                print("🚧 퀴즈 추가 기능은 준비 중입니다.")
+            elif choice == 3:
+                print("🚧 퀴즈 목록 기능은 준비 중입니다.")
+            elif choice == 4:
+                print("🚧 점수 확인 기능은 준비 중입니다.")
+            elif choice == 5:
+                print("👋 프로그램을 종료합니다. 다음에 또 만나요!")
+                break  # while 반복을 끝내서 프로그램 종료
+
+
+def main():
+    game = QuizGame()  # 게임 객체 만들기
+    game.run()         # 게임 시작
+
+
 if __name__ == "__main__":
-    quizzes = create_default_quizzes()
-    print(f"기본 퀴즈 개수: {len(quizzes)}개")
-    for number, quiz in enumerate(quizzes, start=1):
-        quiz.display(number)
+    main()
