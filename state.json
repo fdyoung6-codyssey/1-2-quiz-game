@@ -1,0 +1,65 @@
+{
+    "quizzes": [
+        {
+            "question": "Python에서 화면에 글자를 출력하는 함수는?",
+            "choices": [
+                "input()",
+                "print()",
+                "len()",
+                "str()"
+            ],
+            "answer": 2
+        },
+        {
+            "question": "Python에서 리스트(list)를 만드는 올바른 방법은?",
+            "choices": [
+                "(1, 2, 3)",
+                "[1, 2, 3]",
+                "{1, 2, 3}",
+                "<1, 2, 3>"
+            ],
+            "answer": 2
+        },
+        {
+            "question": "클래스로 객체를 만들 때 자동으로 실행되는 메서드는?",
+            "choices": [
+                "__start__",
+                "__main__",
+                "__init__",
+                "__run__"
+            ],
+            "answer": 3
+        },
+        {
+            "question": "Git에서 변경 내용을 기록(저장)하는 명령어는?",
+            "choices": [
+                "git add",
+                "git commit",
+                "git push",
+                "git clone"
+            ],
+            "answer": 2
+        },
+        {
+            "question": "GitHub(원격 저장소)의 변경사항을 내 컴퓨터로 가져오는 명령어는?",
+            "choices": [
+                "git push",
+                "git init",
+                "git pull",
+                "git checkout"
+            ],
+            "answer": 3
+        },
+        {
+            "question": "JSON 파일에 한글을 저장할 때 사용하는 인코딩은?",
+            "choices": [
+                "ASCII",
+                "EUC-KR",
+                "UTF-8",
+                "CP949"
+            ],
+            "answer": 3
+        }
+    ],
+    "best_score": 100
+}
