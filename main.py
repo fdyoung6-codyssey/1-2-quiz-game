@@ -25,13 +25,40 @@ class Quiz:
         return user_answer == self.answer
 
 
-# ----- 테스트용 코드 (Quiz 클래스가 잘 동작하는지 확인) -----
+def create_default_quizzes():
+    """처음 실행할 때 사용할 기본 퀴즈 5개를 만들어 리스트로 돌려준다"""
+    return [
+        Quiz(
+            "Python에서 화면에 글자를 출력하는 함수는?",
+            ["input()", "print()", "len()", "str()"],
+            2,
+        ),
+        Quiz(
+            "Python에서 리스트(list)를 만드는 올바른 방법은?",
+            ["(1, 2, 3)", "[1, 2, 3]", "{1, 2, 3}", "<1, 2, 3>"],
+            2,
+        ),
+        Quiz(
+            "클래스로 객체를 만들 때 자동으로 실행되는 메서드는?",
+            ["__start__", "__main__", "__init__", "__run__"],
+            3,
+        ),
+        Quiz(
+            "Git에서 변경 내용을 기록(저장)하는 명령어는?",
+            ["git add", "git commit", "git push", "git clone"],
+            2,
+        ),
+        Quiz(
+            "GitHub(원격 저장소)의 변경사항을 내 컴퓨터로 가져오는 명령어는?",
+            ["git push", "git init", "git pull", "git checkout"],
+            3,
+        ),
+    ]
+
+
+# ----- 테스트용 코드 (기본 퀴즈가 잘 만들어졌는지 확인) -----
 if __name__ == "__main__":
-    sample = Quiz(
-        "Python의 창시자는?",
-        ["Guido", "Linus", "Bjarne", "James"],
-        1,
-    )
-    sample.display(1)
-    print("\n1번을 고르면 정답?", sample.is_correct(1))
-    print("2번을 고르면 정답?", sample.is_correct(2))
+    quizzes = create_default_quizzes()
+    print(f"기본 퀴즈 개수: {len(quizzes)}개")
+    for number, quiz in enumerate(quizzes, start=1):
+        quiz.display(number)
