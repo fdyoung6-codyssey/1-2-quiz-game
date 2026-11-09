@@ -126,6 +126,10 @@ class QuizGame:
         score = int(correct / total * 100)
         print("=" * 40)
         print(f"🏆 결과: {total}문제 중 {correct}문제 정답! ({score}점)")
+        # 최고 점수와 비교해서 더 높으면 갱신
+        if self.best_score is None or score > self.best_score:
+            self.best_score = score
+            print("🎉 새로운 최고 점수입니다!")
         print("=" * 40)
 
     def show_quiz_list(self):
@@ -169,6 +173,15 @@ class QuizGame:
         self.quizzes.append(new_quiz)
         print("✅ 퀴즈가 추가되었습니다!")
 
+    def show_score(self):
+        """최고 점수를 보여준다"""
+        # 아직 퀴즈를 한 번도 안 푼 경우
+        if self.best_score is None:
+            print("📭 아직 퀴즈를 풀지 않았습니다. 먼저 퀴즈를 풀어 보세요!")
+            return
+
+        print(f"\n🏆 최고 점수: {self.best_score}점")
+
     def run(self):
         """프로그램의 중심: 메뉴를 보여주고 선택한 기능을 실행한다"""
         while True:
@@ -182,7 +195,7 @@ class QuizGame:
             elif choice == 3:
                 self.show_quiz_list()
             elif choice == 4:
-                print("🚧 점수 확인 기능은 준비 중입니다.")
+                self.show_score()
             elif choice == 5:
                 print("👋 프로그램을 종료합니다. 다음에 또 만나요!")
                 break  # while 반복을 끝내서 프로그램 종료
