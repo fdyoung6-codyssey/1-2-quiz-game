@@ -179,7 +179,8 @@ class QuizGame:
         print("2. 퀴즈 추가")
         print("3. 퀴즈 목록")
         print("4. 점수 확인")
-        print("5. 종료")
+        print("5. 퀴즈 삭제")
+        print("6. 종료")
         print("=" * 40)
 
     def play_quiz(self):
@@ -264,11 +265,34 @@ class QuizGame:
 
         print(f"\n🏆 최고 점수: {self.best_score}점")
 
+    def delete_quiz(self):
+        """[보너스 4] 번호를 입력받아 퀴즈를 삭제한다"""
+        if len(self.quizzes) == 0:
+            print("📭 삭제할 퀴즈가 없습니다.")
+            return
+
+        self.show_quiz_list()  # 먼저 목록을 보여준다
+        count = len(self.quizzes)
+        number = self.get_number(f"삭제할 퀴즈 번호 (1-{count}): ", 1, count)
+
+        # 리스트 번호는 0부터 시작하므로 1을 뺀다
+        target = self.quizzes[number - 1]
+
+        # 실수로 지우지 않도록 한 번 더 확인
+        confirm = self.get_text(f"'{target.question}' 퀴즈를 삭제할까요? (y/n): ").lower()
+        if confirm != "y":
+            print("↩️ 삭제를 취소했습니다.")
+            return
+
+        self.quizzes.pop(number - 1)  # pop : 해당 위치의 항목을 리스트에서 꺼내 삭제
+        self.save_data()              # 삭제 결과를 파일에 반영
+        print("🗑️ 퀴즈가 삭제되었습니다.")
+
     def run(self):
         """프로그램의 중심: 메뉴를 보여주고 선택한 기능을 실행한다"""
         while True:
             self.show_menu()
-            choice = self.get_number("선택: ", 1, 5)
+            choice = self.get_number("선택: ", 1, 6)
 
             if choice == 1:
                 self.play_quiz()
@@ -279,6 +303,8 @@ class QuizGame:
             elif choice == 4:
                 self.show_score()
             elif choice == 5:
+                self.delete_quiz()
+            elif choice == 6:
                 self.save_data()  # [새로 추가] 종료 전에 저장
                 print("💾 데이터를 저장했습니다.")
                 print("👋 프로그램을 종료합니다. 다음에 또 만나요!")
