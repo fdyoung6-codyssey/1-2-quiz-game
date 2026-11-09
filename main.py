@@ -2,6 +2,7 @@
 
 import json  # [새로 추가] JSON 파일을 읽고 쓰는 표준 라이브러리
 import os    # [새로 추가] 파일 경로를 다루는 표준 라이브러리
+import random  # [보너스] 문제 순서를 섞는 표준 라이브러리
 
 # [새로 추가] 데이터 파일 위치: main.py와 같은 폴더(프로젝트 루트)의 state.json
 STATE_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "state.json")
@@ -188,11 +189,17 @@ class QuizGame:
             print("📭 등록된 퀴즈가 없습니다. 먼저 퀴즈를 추가해 주세요.")
             return
 
-        total = len(self.quizzes)  # 전체 문제 수
-        correct = 0                # 맞힌 문제 수
-        print(f"\n📝 퀴즈를 시작합니다! (총 {total}문제)")
+        # [보너스 2] 몇 문제를 풀지 선택 (1 ~ 전체 퀴즈 수)
+        max_count = len(self.quizzes)
+        total = self.get_number(f"\n몇 문제를 풀까요? (1-{max_count}): ", 1, max_count)
+        correct = 0                   # 맞힌 문제 수
 
-        for number, quiz in enumerate(self.quizzes, start=1):
+        quiz_order = self.quizzes[:]  # 원래 목록은 그대로 두고 복사본 만들기
+        random.shuffle(quiz_order)    # 복사본의 순서를 무작위로 섞기
+        quiz_order = quiz_order[:total]  # 섞은 목록에서 앞에서부터 total개만 사용
+
+        print(f"\n📝 퀴즈를 시작합니다! (총 {total}문제)")
+        for number, quiz in enumerate(quiz_order, start=1):
             print("-" * 40)
             quiz.display(number)
             user_answer = self.get_number("\n정답 입력: ", 1, 4)
