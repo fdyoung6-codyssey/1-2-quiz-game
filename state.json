@@ -100,5 +100,21 @@
             "hint": "'합병하다'라는 뜻의 영어 단어입니다."
         }
     ],
-    "best_score": 100
+    "best_score": 100,
+    "history": [
+        {
+            "date": "2026-11-09 18:06",
+            "total": 9,
+            "correct": 9,
+            "score": 100,
+            "hints": 0
+        },
+        {
+            "date": "2026-11-09 18:08",
+            "total": 3,
+            "correct": 3,
+            "score": 100,
+            "hints": 0
+        }
+    ]
 }
