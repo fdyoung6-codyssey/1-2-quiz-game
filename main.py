@@ -280,8 +280,14 @@ class QuizGame:
 
 def main():
     game = QuizGame()  # 게임 객체 만들기 (이때 파일에서 데이터를 불러옴)
-    game.run()         # 게임 시작
-
+    try:
+        game.run()     # 게임 시작
+    except (KeyboardInterrupt, EOFError):
+        # KeyboardInterrupt : Ctrl+C를 눌렀을 때
+        # EOFError : 입력이 갑자기 끊겼을 때 (Windows에서는 Ctrl+Z 후 Enter)
+        print("\n\n⚠️ 입력이 중단되었습니다. 데이터를 저장하고 안전하게 종료합니다.")
+        game.save_data()
+        print("👋 프로그램을 종료합니다.")
 
 if __name__ == "__main__":
     main()

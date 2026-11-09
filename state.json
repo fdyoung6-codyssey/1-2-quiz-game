@@ -59,6 +59,26 @@
                 "CP949"
             ],
             "answer": 3
+        },
+        {
+            "question": "리스트에 새 항목을 맨 뒤에 추가하는 메서드는?",
+            "choices": [
+                "insert()",
+                "append()",
+                "add()",
+                "push()"
+            ],
+            "answer": 2
+        },
+        {
+            "question": "숫자로 바꿀 수 없는 글자를 int()로 바꾸면 나는 오류는?",
+            "choices": [
+                "KeyError",
+                "TypeError",
+                "ValueError",
+                "IndexError"
+            ],
+            "answer": 3
         }
     ],
     "best_score": 100
