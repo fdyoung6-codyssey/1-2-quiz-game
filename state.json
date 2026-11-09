@@ -8,7 +8,8 @@
                 "len()",
                 "str()"
             ],
-            "answer": 2
+            "answer": 2,
+            "hint": ""
         },
         {
             "question": "Python에서 리스트(list)를 만드는 올바른 방법은?",
@@ -18,7 +19,8 @@
                 "{1, 2, 3}",
                 "<1, 2, 3>"
             ],
-            "answer": 2
+            "answer": 2,
+            "hint": ""
         },
         {
             "question": "클래스로 객체를 만들 때 자동으로 실행되는 메서드는?",
@@ -28,7 +30,8 @@
                 "__init__",
                 "__run__"
             ],
-            "answer": 3
+            "answer": 3,
+            "hint": ""
         },
         {
             "question": "Git에서 변경 내용을 기록(저장)하는 명령어는?",
@@ -38,7 +41,8 @@
                 "git push",
                 "git clone"
             ],
-            "answer": 2
+            "answer": 2,
+            "hint": ""
         },
         {
             "question": "GitHub(원격 저장소)의 변경사항을 내 컴퓨터로 가져오는 명령어는?",
@@ -48,7 +52,8 @@
                 "git pull",
                 "git checkout"
             ],
-            "answer": 3
+            "answer": 3,
+            "hint": ""
         },
         {
             "question": "JSON 파일에 한글을 저장할 때 사용하는 인코딩은?",
@@ -58,7 +63,8 @@
                 "UTF-8",
                 "CP949"
             ],
-            "answer": 3
+            "answer": 3,
+            "hint": ""
         },
         {
             "question": "리스트에 새 항목을 맨 뒤에 추가하는 메서드는?",
@@ -68,7 +74,8 @@
                 "add()",
                 "push()"
             ],
-            "answer": 2
+            "answer": 2,
+            "hint": ""
         },
         {
             "question": "숫자로 바꿀 수 없는 글자를 int()로 바꾸면 나는 오류는?",
@@ -78,7 +85,19 @@
                 "ValueError",
                 "IndexError"
             ],
-            "answer": 3
+            "answer": 3,
+            "hint": ""
+        },
+        {
+            "question": "Git에서 브랜치를 합치는 명령어는?",
+            "choices": [
+                "git merge",
+                "git branch",
+                "git log",
+                "git status"
+            ],
+            "answer": 1,
+            "hint": "'합병하다'라는 뜻의 영어 단어입니다."
         }
     ],
     "best_score": 100
