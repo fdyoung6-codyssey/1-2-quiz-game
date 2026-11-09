@@ -141,6 +141,34 @@ class QuizGame:
             print(f"[{number}] {quiz.question}")
         print("-" * 40)
 
+    def get_text(self, prompt):
+        """글자를 입력받는다. 비어 있으면 다시 물어본다."""
+        while True:
+            text = input(prompt).strip()
+            if text == "":
+                print("⚠️ 내용이 비어 있습니다. 다시 입력하세요.")
+                continue
+            return text
+
+    def add_quiz(self):
+        """새 퀴즈를 입력받아 목록에 추가한다"""
+        print("\n📌 새로운 퀴즈를 추가합니다.")
+
+        question = self.get_text("문제를 입력하세요: ")
+
+        # 선택지 4개를 하나씩 입력받아 리스트에 담기
+        choices = []
+        for i in range(1, 5):
+            choice = self.get_text(f"선택지 {i}: ")
+            choices.append(choice)
+
+        answer = self.get_number("정답 번호 (1-4): ", 1, 4)
+
+        # 입력받은 내용으로 Quiz 객체를 만들어 목록에 추가
+        new_quiz = Quiz(question, choices, answer)
+        self.quizzes.append(new_quiz)
+        print("✅ 퀴즈가 추가되었습니다!")
+
     def run(self):
         """프로그램의 중심: 메뉴를 보여주고 선택한 기능을 실행한다"""
         while True:
@@ -150,7 +178,7 @@ class QuizGame:
             if choice == 1:
                 self.play_quiz()
             elif choice == 2:
-                print("🚧 퀴즈 추가 기능은 준비 중입니다.")
+                self.add_quiz()
             elif choice == 3:
                 self.show_quiz_list()
             elif choice == 4:
