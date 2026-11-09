@@ -100,6 +100,34 @@ class QuizGame:
         print("5. 종료")
         print("=" * 40)
 
+    def play_quiz(self):
+        """저장된 퀴즈를 순서대로 출제하고 결과를 보여준다"""
+        # 퀴즈가 하나도 없는 경우
+        if len(self.quizzes) == 0:
+            print("📭 등록된 퀴즈가 없습니다. 먼저 퀴즈를 추가해 주세요.")
+            return
+
+        total = len(self.quizzes)  # 전체 문제 수
+        correct = 0                # 맞힌 문제 수
+        print(f"\n📝 퀴즈를 시작합니다! (총 {total}문제)")
+
+        for number, quiz in enumerate(self.quizzes, start=1):
+            print("-" * 40)
+            quiz.display(number)
+            user_answer = self.get_number("\n정답 입력: ", 1, 4)
+
+            if quiz.is_correct(user_answer):
+                print("✅ 정답입니다!")
+                correct += 1  # 맞힌 개수 1 증가
+            else:
+                print(f"❌ 오답입니다. 정답은 {quiz.answer}번입니다.")
+
+        # 결과 계산: 맞힌 비율을 100점 만점으로 바꾸기
+        score = int(correct / total * 100)
+        print("=" * 40)
+        print(f"🏆 결과: {total}문제 중 {correct}문제 정답! ({score}점)")
+        print("=" * 40)
+
     def run(self):
         """프로그램의 중심: 메뉴를 보여주고 선택한 기능을 실행한다"""
         while True:
@@ -107,7 +135,7 @@ class QuizGame:
             choice = self.get_number("선택: ", 1, 5)
 
             if choice == 1:
-                print("🚧 퀴즈 풀기 기능은 준비 중입니다.")
+                self.play_quiz()
             elif choice == 2:
                 print("🚧 퀴즈 추가 기능은 준비 중입니다.")
             elif choice == 3:
