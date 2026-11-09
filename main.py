@@ -1,22 +1,23 @@
 # 나만의 퀴즈 게임 - 프로그램 시작 파일
 
-import json  # [새로 추가] JSON 파일을 읽고 쓰는 표준 라이브러리
-import os    # [새로 추가] 파일 경로를 다루는 표준 라이브러리
-import random  # [보너스] 문제 순서를 섞는 표준 라이브러리
+import json    # JSON 파일을 읽고 쓰는 표준 라이브러리
+import os      # 파일 경로를 다루는 표준 라이브러리
+import random  # [보너스 1] 문제 순서를 섞는 표준 라이브러리
 
-# [새로 추가] 데이터 파일 위치: main.py와 같은 폴더(프로젝트 루트)의 state.json
+# 데이터 파일 위치: main.py와 같은 폴더(프로젝트 루트)의 state.json
 STATE_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "state.json")
 
 
 class Quiz:
     """퀴즈 한 문제를 표현하는 클래스"""
 
-    def __init__(self, question, choices, answer):
+    def __init__(self, question, choices, answer, hint=""):
         # __init__ : 퀴즈를 새로 만들 때 자동으로 실행되는 함수
         # self : "지금 만들어지는 이 퀴즈 자신"을 가리킴
         self.question = question  # 문제 (글자)
         self.choices = choices    # 선택지 4개 (리스트)
         self.answer = answer      # 정답 번호 1~4 (숫자)
+        self.hint = hint          # [보너스 3] 힌트 (없으면 빈 글자 "")
 
     def display(self, number):
         """문제와 선택지를 화면에 보여준다"""
@@ -32,11 +33,12 @@ class Quiz:
         return user_answer == self.answer
 
     def to_dict(self):
-        """[새로 추가] 퀴즈를 JSON으로 저장할 수 있는 딕셔너리로 바꾼다"""
+        """퀴즈를 JSON으로 저장할 수 있는 딕셔너리로 바꾼다"""
         return {
             "question": self.question,
             "choices": self.choices,
             "answer": self.answer,
+            "hint": self.hint,  # [보너스 3] 힌트도 함께 저장
         }
 
 
@@ -47,26 +49,31 @@ def create_default_quizzes():
             "Python에서 화면에 글자를 출력하는 함수는?",
             ["input()", "print()", "len()", "str()"],
             2,
+            "화면에 '출력'한다는 영어 단어를 떠올려 보세요.",
         ),
         Quiz(
             "Python에서 리스트(list)를 만드는 올바른 방법은?",
             ["(1, 2, 3)", "[1, 2, 3]", "{1, 2, 3}", "<1, 2, 3>"],
             2,
+            "대괄호를 사용합니다.",
         ),
         Quiz(
             "클래스로 객체를 만들 때 자동으로 실행되는 메서드는?",
             ["__start__", "__main__", "__init__", "__run__"],
             3,
+            "'초기화(initialize)'의 줄임말입니다.",
         ),
         Quiz(
             "Git에서 변경 내용을 기록(저장)하는 명령어는?",
             ["git add", "git commit", "git push", "git clone"],
             2,
+            "-m 옵션으로 메시지를 함께 남깁니다.",
         ),
         Quiz(
             "GitHub(원격 저장소)의 변경사항을 내 컴퓨터로 가져오는 명령어는?",
             ["git push", "git init", "git pull", "git checkout"],
             3,
+            "'당기다'라는 뜻의 영어 단어입니다.",
         ),
     ]
 
@@ -77,9 +84,9 @@ class QuizGame:
     def __init__(self):
         self.quizzes = []       # 퀴즈 목록 (리스트)
         self.best_score = None  # 최고 점수 (아직 안 풀었으면 None)
-        self.load_data()        # [새로 추가] 시작할 때 파일에서 불러오기
+        self.load_data()        # 시작할 때 파일에서 불러오기
 
-    # ---------- [새로 추가] 파일 저장 / 불러오기 ----------
+    # ---------- 파일 저장 / 불러오기 ----------
 
     def load_data(self):
         """state.json에서 퀴즈 목록과 최고 점수를 불러온다"""
@@ -97,7 +104,8 @@ class QuizGame:
 
             self.quizzes = []
             for item in data["quizzes"]:
-                quiz = Quiz(item["question"], item["choices"], item["answer"])
+                # [보너스 3] 예전 파일에는 hint가 없으므로 get()으로 없으면 "" 사용
+                quiz = Quiz(item["question"], item["choices"], item["answer"], item.get("hint", ""))
                 self.quizzes.append(quiz)
             self.best_score = data["best_score"]
 
@@ -184,7 +192,7 @@ class QuizGame:
         print("=" * 40)
 
     def play_quiz(self):
-        """저장된 퀴즈를 순서대로 출제하고 결과를 보여준다"""
+        """저장된 퀴즈를 출제하고 결과를 보여준다"""
         # 퀴즈가 하나도 없는 경우
         if len(self.quizzes) == 0:
             print("📭 등록된 퀴즈가 없습니다. 먼저 퀴즈를 추가해 주세요.")
@@ -193,34 +201,58 @@ class QuizGame:
         # [보너스 2] 몇 문제를 풀지 선택 (1 ~ 전체 퀴즈 수)
         max_count = len(self.quizzes)
         total = self.get_number(f"\n몇 문제를 풀까요? (1-{max_count}): ", 1, max_count)
-        correct = 0                   # 맞힌 문제 수
+        correct = 0       # 맞힌 문제 수
+        points = 0        # [보너스 3] 점수 계산용 (그냥 맞히면 1점, 힌트 보고 맞히면 0.5점)
+        hint_count = 0    # [보너스 3] 힌트를 본 횟수
 
-        quiz_order = self.quizzes[:]  # 원래 목록은 그대로 두고 복사본 만들기
-        random.shuffle(quiz_order)    # 복사본의 순서를 무작위로 섞기
+        # [보너스 1] 원래 목록은 그대로 두고 복사본을 섞어서 출제
+        quiz_order = self.quizzes[:]
+        random.shuffle(quiz_order)
         quiz_order = quiz_order[:total]  # 섞은 목록에서 앞에서부터 total개만 사용
 
         print(f"\n📝 퀴즈를 시작합니다! (총 {total}문제)")
+        print("💡 정답 입력에서 0을 누르면 힌트를 볼 수 있어요. (힌트를 보고 맞히면 0.5점)")
+
         for number, quiz in enumerate(quiz_order, start=1):
             print("-" * 40)
             quiz.display(number)
-            user_answer = self.get_number("\n정답 입력: ", 1, 4)
+            used_hint = False  # [보너스 3] 이 문제에서 힌트를 봤는지
+
+            user_answer = self.get_number("\n정답 입력 (힌트: 0): ", 0, 4)
+
+            # [보너스 3] 0을 입력하면 힌트 보여주기
+            if user_answer == 0:
+                if quiz.hint == "":
+                    print("💡 이 문제는 힌트가 없습니다.")
+                else:
+                    print(f"💡 힌트: {quiz.hint}")
+                    used_hint = True
+                    hint_count += 1
+                user_answer = self.get_number("정답 입력: ", 1, 4)
 
             if quiz.is_correct(user_answer):
-                print("✅ 정답입니다!")
                 correct += 1  # 맞힌 개수 1 증가
+                if used_hint:
+                    points += 0.5
+                    print("✅ 정답입니다! (힌트 사용: 0.5점)")
+                else:
+                    points += 1
+                    print("✅ 정답입니다!")
             else:
                 print(f"❌ 오답입니다. 정답은 {quiz.answer}번입니다.")
 
-        # 결과 계산: 맞힌 비율을 100점 만점으로 바꾸기
-        score = int(correct / total * 100)
+        # 결과 계산: 얻은 점수를 100점 만점으로 바꾸기
+        score = int(points / total * 100)
         print("=" * 40)
         print(f"🏆 결과: {total}문제 중 {correct}문제 정답! ({score}점)")
+        if hint_count > 0:
+            print(f"💡 힌트 사용: {hint_count}회 (힌트를 본 문제는 0.5점)")
 
         # 최고 점수와 비교해서 더 높으면 갱신
         if self.best_score is None or score > self.best_score:
             self.best_score = score
             print("🎉 새로운 최고 점수입니다!")
-            self.save_data()  # [새로 추가] 최고 점수가 바뀌면 바로 저장
+            self.save_data()  # 최고 점수가 바뀌면 바로 저장
         print("=" * 40)
 
     def show_quiz_list(self):
@@ -250,10 +282,13 @@ class QuizGame:
 
         answer = self.get_number("정답 번호 (1-4): ", 1, 4)
 
+        # [보너스 3] 힌트는 선택 사항이라 빈 입력도 허용 (그냥 Enter면 힌트 없음)
+        hint = input("힌트 (없으면 Enter): ").strip()
+
         # 입력받은 내용으로 Quiz 객체를 만들어 목록에 추가
-        new_quiz = Quiz(question, choices, answer)
+        new_quiz = Quiz(question, choices, answer, hint)
         self.quizzes.append(new_quiz)
-        self.save_data()  # [새로 추가] 추가한 퀴즈를 바로 파일에 저장
+        self.save_data()  # 추가한 퀴즈를 바로 파일에 저장
         print("✅ 퀴즈가 추가되었습니다!")
 
     def show_score(self):
@@ -305,7 +340,7 @@ class QuizGame:
             elif choice == 5:
                 self.delete_quiz()
             elif choice == 6:
-                self.save_data()  # [새로 추가] 종료 전에 저장
+                self.save_data()  # 종료 전에 저장
                 print("💾 데이터를 저장했습니다.")
                 print("👋 프로그램을 종료합니다. 다음에 또 만나요!")
                 break  # while 반복을 끝내서 프로그램 종료
@@ -321,6 +356,7 @@ def main():
         print("\n\n⚠️ 입력이 중단되었습니다. 데이터를 저장하고 안전하게 종료합니다.")
         game.save_data()
         print("👋 프로그램을 종료합니다.")
+
 
 if __name__ == "__main__":
     main()
