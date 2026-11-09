@@ -3,6 +3,7 @@
 import json    # JSON 파일을 읽고 쓰는 표준 라이브러리
 import os      # 파일 경로를 다루는 표준 라이브러리
 import random  # [보너스 1] 문제 순서를 섞는 표준 라이브러리
+from datetime import datetime  # [보너스 5] 현재 날짜·시간을 구하는 표준 라이브러리
 
 # 데이터 파일 위치: main.py와 같은 폴더(프로젝트 루트)의 state.json
 STATE_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "state.json")
@@ -79,22 +80,24 @@ def create_default_quizzes():
 
 
 class QuizGame:
-    """퀴즈 게임 전체(퀴즈 목록, 최고 점수, 메뉴)를 관리하는 클래스"""
+    """퀴즈 게임 전체(퀴즈 목록, 최고 점수, 기록, 메뉴)를 관리하는 클래스"""
 
     def __init__(self):
         self.quizzes = []       # 퀴즈 목록 (리스트)
         self.best_score = None  # 최고 점수 (아직 안 풀었으면 None)
+        self.history = []       # [보너스 5] 게임 기록 목록 (딕셔너리들의 리스트)
         self.load_data()        # 시작할 때 파일에서 불러오기
 
     # ---------- 파일 저장 / 불러오기 ----------
 
     def load_data(self):
-        """state.json에서 퀴즈 목록과 최고 점수를 불러온다"""
+        """state.json에서 퀴즈 목록, 최고 점수, 게임 기록을 불러온다"""
         # 1) 파일이 없으면 (처음 실행) → 기본 퀴즈 사용
         if not os.path.exists(STATE_FILE):
             print("📂 저장된 파일이 없어 기본 퀴즈로 시작합니다.")
             self.quizzes = create_default_quizzes()
             self.best_score = None
+            self.history = []
             return
 
         # 2) 파일이 있으면 읽어 오기 (손상된 경우를 대비해 try/except 사용)
@@ -108,21 +111,24 @@ class QuizGame:
                 quiz = Quiz(item["question"], item["choices"], item["answer"], item.get("hint", ""))
                 self.quizzes.append(quiz)
             self.best_score = data["best_score"]
+            # [보너스 5] 예전 파일에는 history가 없으므로 없으면 빈 리스트 사용
+            self.history = data.get("history", [])
 
             if self.best_score is None:
                 best_text = "없음"
             else:
                 best_text = f"{self.best_score}점"
-            print(f"📂 저장된 데이터를 불러왔습니다. (퀴즈 {len(self.quizzes)}개, 최고점수 {best_text})")
+            print(f"📂 저장된 데이터를 불러왔습니다. (퀴즈 {len(self.quizzes)}개, 최고점수 {best_text}, 기록 {len(self.history)}회)")
 
         except (json.JSONDecodeError, KeyError, TypeError, OSError):
             # 3) 파일이 손상되었거나 읽을 수 없는 경우 → 기본 퀴즈로 복구
             print("⚠️ 저장 파일이 손상되어 기본 퀴즈로 복구합니다.")
             self.quizzes = create_default_quizzes()
             self.best_score = None
+            self.history = []
 
     def save_data(self):
-        """퀴즈 목록과 최고 점수를 state.json에 저장한다"""
+        """퀴즈 목록, 최고 점수, 게임 기록을 state.json에 저장한다"""
         quiz_list = []
         for quiz in self.quizzes:
             quiz_list.append(quiz.to_dict())  # Quiz 객체 → 딕셔너리
@@ -130,6 +136,7 @@ class QuizGame:
         data = {
             "quizzes": quiz_list,
             "best_score": self.best_score,
+            "history": self.history,  # [보너스 5] 게임 기록도 저장
         }
 
         try:
@@ -248,12 +255,23 @@ class QuizGame:
         if hint_count > 0:
             print(f"💡 힌트 사용: {hint_count}회 (힌트를 본 문제는 0.5점)")
 
+        # [보너스 5] 이번 게임 기록을 history에 추가
+        record = {
+            "date": datetime.now().strftime("%Y-%m-%d %H:%M"),  # 예: 2026-11-09 15:30
+            "total": total,         # 푼 문제 수
+            "correct": correct,     # 맞힌 문제 수
+            "score": score,         # 점수
+            "hints": hint_count,    # 힌트 사용 횟수
+        }
+        self.history.append(record)
+
         # 최고 점수와 비교해서 더 높으면 갱신
         if self.best_score is None or score > self.best_score:
             self.best_score = score
             print("🎉 새로운 최고 점수입니다!")
-            self.save_data()  # 최고 점수가 바뀌면 바로 저장
         print("=" * 40)
+
+        self.save_data()  # [보너스 5] 게임이 끝날 때마다 기록과 점수를 저장
 
     def show_quiz_list(self):
         """저장된 퀴즈 목록을 번호와 함께 보여준다"""
@@ -292,13 +310,27 @@ class QuizGame:
         print("✅ 퀴즈가 추가되었습니다!")
 
     def show_score(self):
-        """최고 점수를 보여준다"""
+        """최고 점수와 게임 기록을 보여준다"""
         # 아직 퀴즈를 한 번도 안 푼 경우
         if self.best_score is None:
             print("📭 아직 퀴즈를 풀지 않았습니다. 먼저 퀴즈를 풀어 보세요!")
             return
 
         print(f"\n🏆 최고 점수: {self.best_score}점")
+
+        # [보너스 5] 게임 기록 히스토리 (최근 10회, 최신 기록부터)
+        print(f"\n📜 게임 기록 (총 {len(self.history)}회, 최근 10회까지 표시)")
+        print("-" * 40)
+        if len(self.history) == 0:
+            print("아직 저장된 게임 기록이 없습니다.")
+        else:
+            recent = self.history[-10:]      # [-10:] : 리스트 뒤에서 10개
+            for record in reversed(recent):  # reversed : 순서를 거꾸로 (최신 기록부터)
+                print(
+                    f"{record['date']} | {record['correct']}/{record['total']}문제 정답 | "
+                    f"{record['score']}점 | 힌트 {record['hints']}회"
+                )
+        print("-" * 40)
 
     def delete_quiz(self):
         """[보너스 4] 번호를 입력받아 퀴즈를 삭제한다"""
