@@ -58,7 +58,9 @@ python main.py
 ├── main.py        # 프로그램 전체 코드 (Quiz, QuizGame 클래스)
 ├── state.json     # 퀴즈 목록, 최고 점수, 게임 기록 저장 파일 (자동 생성)
 ├── README.md      # 프로젝트 설명서
-└── .gitignore     # Git에 올리지 않을 파일 목록
+├── .gitignore     # Git에 올리지 않을 파일 목록
+└── docs/
+    └── screenshots/  # 실행 화면 스크린샷 (개발환경, 실행결과, 보너스, Git, GitHub)
 ```
 
 ### 클래스 구조
