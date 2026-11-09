@@ -3,10 +3,16 @@
 import json    # JSON 파일을 읽고 쓰는 표준 라이브러리
 import os      # 파일 경로를 다루는 표준 라이브러리
 import random  # [보너스 1] 문제 순서를 섞는 표준 라이브러리
+import shutil  # [백업] 파일을 복사하는 표준 라이브러리
 from datetime import datetime  # [보너스 5] 현재 날짜·시간을 구하는 표준 라이브러리
 
 # 데이터 파일 위치: main.py와 같은 폴더(프로젝트 루트)의 state.json
 STATE_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "state.json")
+
+
+def get_backup_file():
+    """[백업] 백업 파일 경로 (state.json → state.json.bak)"""
+    return STATE_FILE + ".bak"
 
 
 class Quiz:
@@ -90,45 +96,61 @@ class QuizGame:
 
     # ---------- 파일 저장 / 불러오기 ----------
 
+    def read_state_file(self, path):
+        """[백업] JSON 파일 하나를 읽어서 퀴즈·최고 점수·기록을 적용한다 (실패하면 예외 발생)"""
+        with open(path, "r", encoding="utf-8") as file:
+            data = json.load(file)  # JSON 글자 → 파이썬 딕셔너리
+
+        quizzes = []
+        for item in data["quizzes"]:
+            # [보너스 3] 예전 파일에는 hint가 없으므로 get()으로 없으면 "" 사용
+            quizzes.append(Quiz(item["question"], item["choices"], item["answer"], item.get("hint", "")))
+
+        # 모든 값을 문제없이 읽은 뒤에 한꺼번에 적용 (중간에 실패하면 기존 값 유지)
+        self.quizzes = quizzes
+        self.best_score = data["best_score"]
+        self.history = data.get("history", [])  # [보너스 5] 예전 파일에는 history가 없음
+
+    def reset_to_default(self):
+        """기본 퀴즈로 초기화한다"""
+        self.quizzes = create_default_quizzes()
+        self.best_score = None
+        self.history = []
+
     def load_data(self):
-        """state.json에서 퀴즈 목록, 최고 점수, 게임 기록을 불러온다"""
+        """state.json에서 데이터를 불러온다. 손상되었으면 백업 → 기본 퀴즈 순서로 복구한다."""
         # 1) 파일이 없으면 (처음 실행) → 기본 퀴즈 사용
         if not os.path.exists(STATE_FILE):
             print("📂 저장된 파일이 없어 기본 퀴즈로 시작합니다.")
-            self.quizzes = create_default_quizzes()
-            self.best_score = None
-            self.history = []
+            self.reset_to_default()
             return
 
-        # 2) 파일이 있으면 읽어 오기 (손상된 경우를 대비해 try/except 사용)
+        # 2) state.json 읽기
         try:
-            with open(STATE_FILE, "r", encoding="utf-8") as file:
-                data = json.load(file)  # JSON 글자 → 파이썬 딕셔너리
-
-            self.quizzes = []
-            for item in data["quizzes"]:
-                # [보너스 3] 예전 파일에는 hint가 없으므로 get()으로 없으면 "" 사용
-                quiz = Quiz(item["question"], item["choices"], item["answer"], item.get("hint", ""))
-                self.quizzes.append(quiz)
-            self.best_score = data["best_score"]
-            # [보너스 5] 예전 파일에는 history가 없으므로 없으면 빈 리스트 사용
-            self.history = data.get("history", [])
-
-            if self.best_score is None:
-                best_text = "없음"
-            else:
-                best_text = f"{self.best_score}점"
+            self.read_state_file(STATE_FILE)
+            best_text = "없음" if self.best_score is None else f"{self.best_score}점"
             print(f"📂 저장된 데이터를 불러왔습니다. (퀴즈 {len(self.quizzes)}개, 최고점수 {best_text}, 기록 {len(self.history)}회)")
-
+            return
         except (json.JSONDecodeError, KeyError, TypeError, OSError):
-            # 3) 파일이 손상되었거나 읽을 수 없는 경우 → 기본 퀴즈로 복구
-            print("⚠️ 저장 파일이 손상되어 기본 퀴즈로 복구합니다.")
-            self.quizzes = create_default_quizzes()
-            self.best_score = None
-            self.history = []
+            print("⚠️ state.json이 손상되었거나 읽을 수 없습니다.")
+
+        # 3) [백업] state.json이 손상되었으면 백업 파일(state.json.bak)로 복구 시도
+        backup_file = get_backup_file()
+        if os.path.exists(backup_file):
+            try:
+                self.read_state_file(backup_file)
+                print(f"♻️ 백업 파일에서 복구했습니다. (퀴즈 {len(self.quizzes)}개)")
+                self.save_data()  # 복구한 내용으로 state.json을 다시 만든다
+                return
+            except (json.JSONDecodeError, KeyError, TypeError, OSError):
+                print("⚠️ 백업 파일도 손상되었습니다.")
+
+        # 4) 백업도 없거나 손상되었으면 → 기본 퀴즈로 초기화
+        print("⚠️ 기본 퀴즈로 복구합니다.")
+        self.reset_to_default()
 
     def save_data(self):
-        """퀴즈 목록, 최고 점수, 게임 기록을 state.json에 저장한다"""
+        """퀴즈 목록, 최고 점수, 게임 기록을 state.json에 저장한다 (저장 전에 백업)"""
         quiz_list = []
         for quiz in self.quizzes:
             quiz_list.append(quiz.to_dict())  # Quiz 객체 → 딕셔너리
@@ -140,12 +162,18 @@ class QuizGame:
         }
 
         try:
+            # [백업] 덮어쓰기 전에 지금 state.json을 state.json.bak으로 복사
+            if os.path.exists(STATE_FILE):
+                shutil.copyfile(STATE_FILE, get_backup_file())
+
             with open(STATE_FILE, "w", encoding="utf-8") as file:
                 # ensure_ascii=False : 한글을 그대로 저장
                 # indent=4 : 사람이 읽기 좋게 줄 바꿈과 들여쓰기
                 json.dump(data, file, ensure_ascii=False, indent=4)
-        except OSError:
-            print("⚠️ 파일 저장 중 오류가 발생했습니다.")
+        except OSError as error:
+            print(f"⚠️ 파일 저장 중 오류가 발생했습니다: {error}")
+            print("   → state.json이 다른 프로그램에서 열려 있거나 읽기 전용인지 확인한 뒤 다시 시도하세요.")
+            print("   → 이전 데이터는 state.json.bak에 남아 있습니다.")
 
     # ---------- 입력 도우미 ----------
 
